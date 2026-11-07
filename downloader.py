@@ -5,9 +5,9 @@ from flask import Flask, Response, render_template_string, stream_with_context
 app = Flask(__name__)
 
 # paste your direct download link from Dropbox or Google Drive here
-EXTERNAL_FILE_URL = 'https://example.com'
+EXTERNAL_FILE_URL = 'https://drive.google.com/file/d/1ExzyNpqpTwvjVvJLXfDQcZfUy4QNHz15/view?usp=sharing'
 # The name the file will have when the user downloads it
-DOWNLOAD_FILENAME = 'your_file.zip' 
+DOWNLOAD_FILENAME = 'file.exe' 
 
 @app.route('/')
 def home():
