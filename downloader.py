@@ -4,9 +4,10 @@ from flask import Flask, Response, render_template_string, stream_with_context
 
 app = Flask(__name__)
 
-# paste your direct download link from Dropbox or Google Drive here
-EXTERNAL_FILE_URL = 'https://drive.google.com/file/d/1ExzyNpqpTwvjVvJLXfDQcZfUy4QNHz15/view?usp=sharing'
-# The name the file will have when the user downloads it
+# Google Drive direct download link for your specific file
+EXTERNAL_FILE_URL = 'https://google.com'
+
+# Sets the exact filename for the user's download
 DOWNLOAD_FILENAME = 'file.exe' 
 
 @app.route('/')
@@ -25,7 +26,7 @@ def home():
     <body>
         <div class="container">
             <h1>Your download is starting...</h1>
-            <p>Please wait while we fetch your file.</p>
+            <p>Please wait while we fetch your file from Google Drive.</p>
             <p>If it doesn't start, <a href="/download">click here to download</a>.</p>
         </div>
     </body>
@@ -35,30 +36,24 @@ def home():
 
 @app.route('/download')
 def download_file():
-    # Make a streaming request to the external cloud host
+    # Stream the file content directly from Google Drive
     req = requests.get(EXTERNAL_FILE_URL, stream=True)
     
     if req.status_code != 200:
-        return f"Error: Could not fetch file from external storage. Status code: {req.status_code}", 500
+        return f"Error: Could not fetch from Google Drive. Status code: {req.status_code}", 500
 
     def generate_chunks():
-        # Read from cloud storage in 1MB chunks and immediately send to the user
+        # Stream in 1MB chunks to ensure Render runs efficiently
         for chunk in req.iter_content(chunk_size=1024 * 1024):
             if chunk:
                 yield chunk
 
-    # Build the streaming response back to the user's browser
     response = Response(
         stream_with_context(generate_chunks()),
         mimetype="application/octet-stream"
     )
     
     response.headers["Content-Disposition"] = f"attachment; filename={DOWNLOAD_FILENAME}"
-    
-    # Forward the file size header if the cloud provider gives it to us
-    if "Content-Length" in req.headers:
-        response.headers["Content-Length"] = req.headers["Content-Length"]
-        
     return response
 
 if __name__ == '__main__':
